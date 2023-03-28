@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 from matplotlib.widgets import Slider
+import matplotlib.cm as cm
+import matplotlib.colors as colors
 
 def data_raw(index, path, name):
     num="%04d"%index
@@ -62,12 +64,14 @@ def clustering(data, i, k, min_x, min_y, min):
 def analysis(mode, path, filename, setsize):
     if (mode==0):
         data_plot=data_raw(0, path, filename)
-        fig = plt.imshow(data_plot, cmap='hot', vmin=np.min(data_plot), vmax=np.max(data_plot))
+        fig = plt.imshow(data_plot, cmap="hot", norm=colors.SymLogNorm(linthresh=0.03, linscale=0.03,
+                                              vmin=np.min(0), vmax=1e7, base=10))
         plt.colorbar()
         data_slider=Slider(ax=plt.axes([0.25, 0.1, 0.65, 0.03]), label="Data index", valmin=0, valmax=setsize-1, valinit=0, valstep=1)
 
         def data_update(index):
-            fig.set_data(data_raw(index, path, filename))
+            data=data_raw(index, path, filename)
+            fig.set_data(data)
         
         data_slider.on_changed(data_update)
     
@@ -92,7 +96,8 @@ def analysis(mode, path, filename, setsize):
     elif (mode == 3):
         data_clustered=data_raw(0,path,filename)
         data_clustered=cluster(data_clustered)
-        fig = plt.imshow(data_clustered, cmap='hot', vmin=np.min(data_clustered), vmax=np.max(data_clustered))
+        fig = plt.imshow(data_clustered, cmap="hot", norm=colors.SymLogNorm(linthresh=0.03, linscale=0.03,
+                                              vmin=np.min(0), vmax=1e7, base=10))
         plt.colorbar()
         data_slider=Slider(ax=plt.axes([0.25, 0.1, 0.65, 0.03]), label="Data index", valmin=0, valmax=setsize-1, valinit=0, valstep=1)
 

@@ -1,6 +1,6 @@
 from functions import *
 
-mode = 0
+mode = 3
 #path="C:\\Users\\domin\\Desktop\\Dataset"
 path="C:\\Users\\domin\\OneDrive\\Desktop\\Dataset 1"
 filename="first_try_"
