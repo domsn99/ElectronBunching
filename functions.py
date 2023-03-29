@@ -36,38 +36,46 @@ def cluster(data):
                     pos_x=i
                     pos_y=k
                     min=data[pos_x][pos_y]
-                    data,min_x,min_y,min=clustering(data, i, k, pos_x, pos_y, min)
+                    data,pos_x,pos_y,min=clustering(data, i, k, pos_x, pos_y, min)
     return data
 
 def clustering(data, i, k, min_x, min_y, min):
+    delay=5
 
     if (data[i][k] < data[min_x][min_y] and data[i][k]!=0.0):
         min=data[i][k]
         min_x=i
         min_y=k
 
-    if (data[i][k+1]!=0.0):
+    if (data[i][k+1]!=0.0 and np.abs(data[i][k+1]-data[min_x][min_y])<=delay):
         data,min_x,min_y,min=clustering(data, i, k+1, min_x, min_y, min)
 
-    if (data[i+1][k+1]!=0.0):
+    if (data[i+1][k+1]!=0.0 and np.abs(data[i+1][k+1]-data[min_x][min_y])<=delay):
         data,min_x,min_y,min=clustering(data, i+1, k+1, min_x, min_y, min)
 
-    if (data[i+1][k]!=0.0):
+    if (data[i+1][k]!=0.0 and np.abs(data[i+1][k]-data[min_x][min_y])<=delay):
         data,min_x,min_y,min=clustering(data, i+1, k, min_x, min_y, min)
 
-    if (data[i+1][k-1]!=0.0):
+    if (data[i+1][k-1]!=0.0 and np.abs(data[i+1][k-1]-data[min_x][min_y])<=delay):
         data,min_x,min_y,min=clustering(data, i+1, k-1, min_x, min_y, min)
+    
+    #if (data[i-1][k]!=0.0 and np.abs(data[i-1][k]-data[min_x][min_y])<=delay):
+    #    data,min_x,min_y,min=clustering(data, i-1, k, min_x, min_y, min)
 
     data[i][k]=0.0
     return data,min_x,min_y,min
 
 def analysis(mode, path, filename, setsize):
+
+    logscale_min=0
+    logscale_max=5e5
+
     if (mode==0):
         data_plot=data_raw(0, path, filename)
         fig = plt.imshow(data_plot, cmap="hot", norm=colors.SymLogNorm(linthresh=0.03, linscale=0.03,
-                                              vmin=np.min(0), vmax=1e7, base=10))
+                                              vmin=logscale_min, vmax=logscale_max, base=10))
         plt.colorbar()
-        data_slider=Slider(ax=plt.axes([0.25, 0.1, 0.65, 0.03]), label="Data index", valmin=0, valmax=setsize-1, valinit=0, valstep=1)
+        data_slider=Slider(ax=plt.axes([0.2, 0, 0.65, 0.03]), label="Data index", valmin=0, valmax=setsize-1, valinit=0, valstep=1)
 
         def data_update(index):
             data=data_raw(index, path, filename)
@@ -97,9 +105,9 @@ def analysis(mode, path, filename, setsize):
         data_clustered=data_raw(0,path,filename)
         data_clustered=cluster(data_clustered)
         fig = plt.imshow(data_clustered, cmap="hot", norm=colors.SymLogNorm(linthresh=0.03, linscale=0.03,
-                                              vmin=np.min(0), vmax=1e7, base=10))
+                                              vmin=logscale_min, vmax=logscale_max, base=10))
         plt.colorbar()
-        data_slider=Slider(ax=plt.axes([0.25, 0.1, 0.65, 0.03]), label="Data index", valmin=0, valmax=setsize-1, valinit=0, valstep=1)
+        data_slider=Slider(ax=plt.axes([0.22, 0, 0.65, 0.03]), label="Data index", valmin=0, valmax=setsize-1, valinit=0, valstep=1)
 
         def data_update(index):
             fig.set_data(cluster(data_raw(index, path, filename)))
