@@ -29,6 +29,15 @@ def data_file_hist (index, path, name):
         data_diff=np.append(data_diff,data_reduced[i+1]-data_reduced[i])
     return np.array(data_diff)
 
+def data_file_hist_clust (index, path, name):
+    num="%04d"%index
+    data_path = cluster(np.loadtxt(path+'\\'+name+num+'_ToA.txt',dtype=float))
+    data_reduced=np.sort(data_path[data_path != 0])
+    data_diff=[]
+    for i in range(len(data_reduced)-1):
+        data_diff=np.append(data_diff,data_reduced[i+1]-data_reduced[i])
+    return np.array(data_diff)
+
 def cluster(data):
     for i in range(data.shape[1]-1):
             for k in range(data.shape[0]-1):
@@ -41,12 +50,15 @@ def cluster(data):
     return data
 
 def clustering(data, i, k, min_x, min_y, min):
-    delay=1000000
+    delay=10000
 
     if (data[i][k] < data[min_x][min_y] and data[i][k]!=0.0):
         min=data[i][k]
         min_x=i
         min_y=k
+
+    #if (data[i-1][k+1]!=0.0 and np.abs(data[i-1][k+1]-data[min_x][min_y])<=delay):
+    #    data,min_x,min_y,min=clustering(data, i-1, k+1, min_x, min_y, min)
 
     if (data[i][k+1]!=0.0 and np.abs(data[i][k+1]-data[min_x][min_y])<=delay):
         data,min_x,min_y,min=clustering(data, i, k+1, min_x, min_y, min)
@@ -60,7 +72,10 @@ def clustering(data, i, k, min_x, min_y, min):
     if (data[i+1][k-1]!=0.0 and np.abs(data[i+1][k-1]-data[min_x][min_y])<=delay):
         data,min_x,min_y,min=clustering(data, i+1, k-1, min_x, min_y, min)
     
-    #if (data[i-1][k]!=0.0 and np.abs(data[i-1][k]-data[min_x][min_y])<=delay):
+    #if (data[i][k-1]!=0.0 and np.abs(data[i][k-1]-data[min_x][min_y])<=delay):
+    #    data,min_x,min_y,min=clustering(data, i-1, k, min_x, min_y, min)
+
+    #if (data[i-1][k+1]!=0.0 and np.abs(data[i-1][k+1]-data[min_x][min_y])<=delay):
     #    data,min_x,min_y,min=clustering(data, i-1, k, min_x, min_y, min)
 
     data[i][k]=0.0
@@ -98,8 +113,8 @@ def analysis(mode, path, filename, setsize):
         for i in tqdm (range(setsize), desc = "Files analyzed: "):
             data_hist.append(data_file_hist(i,path,filename))
         data_flattened=np.hstack(data_hist)
-        plt.hist(data_flattened, bins='auto', range=(0.0,100.0), density=True)
-        plt.ylabel("Normalized probability")
+        plt.hist(data_flattened, bins='auto', range=(0.0,1000.0))
+        plt.ylabel("Ct/bin")
         plt.xlabel("Time bin ["+str(np.min(data_flattened[data_flattened != 0]))+" ns]")
     
     elif (mode == 3):
@@ -114,4 +129,14 @@ def analysis(mode, path, filename, setsize):
             fig.set_data(cluster(data_raw(index, path, filename)))
         
         data_slider.on_changed(data_update)
+
+    elif (mode == 4):
+        data_histclust = []
+        for i in tqdm (range(setsize), desc = "Files analyzed: "):
+            data_histclust.append(data_file_hist_clust(i,path,filename))
+        data_flattened=np.hstack(data_histclust)
+        plt.hist(data_flattened, bins='auto', range=(0.0,1000.0))
+        plt.ylabel("Ct/bin")
+        plt.xlabel("Time bin ["+str(np.min(data_flattened[data_flattened != 0]))+" ns]")
+
     plt.show()
