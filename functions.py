@@ -37,10 +37,11 @@ def cluster(data):
                     pos_y=k
                     min=data[pos_x][pos_y]
                     data,pos_x,pos_y,min=clustering(data, i, k, pos_x, pos_y, min)
+                    data[pos_x][pos_y]=min
     return data
 
 def clustering(data, i, k, min_x, min_y, min):
-    delay=5
+    delay=1000000
 
     if (data[i][k] < data[min_x][min_y] and data[i][k]!=0.0):
         min=data[i][k]
@@ -68,7 +69,7 @@ def clustering(data, i, k, min_x, min_y, min):
 def analysis(mode, path, filename, setsize):
 
     logscale_min=0
-    logscale_max=5e5
+    logscale_max=1
 
     if (mode==0):
         data_plot=data_raw(0, path, filename)
@@ -107,7 +108,7 @@ def analysis(mode, path, filename, setsize):
         fig = plt.imshow(data_clustered, cmap="hot", norm=colors.SymLogNorm(linthresh=0.03, linscale=0.03,
                                               vmin=logscale_min, vmax=logscale_max, base=10))
         plt.colorbar()
-        data_slider=Slider(ax=plt.axes([0.22, 0, 0.65, 0.03]), label="Data index", valmin=0, valmax=setsize-1, valinit=0, valstep=1)
+        data_slider=Slider(ax=plt.axes([0.2, 0, 0.65, 0.03]), label="Data index", valmin=0, valmax=setsize-1, valinit=0, valstep=1)
 
         def data_update(index):
             fig.set_data(cluster(data_raw(index, path, filename)))
